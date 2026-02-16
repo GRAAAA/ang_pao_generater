@@ -30,7 +30,6 @@
                 radial-gradient(circle at 80% 70%, rgba(255,210,0,0.08) 0%, transparent 50%);
         }
 
-        /* TYPOGRAPHY */
         h1, h2, h3 { 
             text-transform: uppercase; 
             margin: 0; 
@@ -76,7 +75,6 @@
             box-shadow: 2px 2px 0 var(--ink-black); 
         }
 
-        /* SCREENS */
         .screen {
             min-height: 100vh;
             display: flex;
@@ -89,7 +87,6 @@
         }
         .hidden { display: none !important; }
 
-        /* HERO */
         #hero-text {
             font-size: 16vw;
             text-align: center;
@@ -103,7 +100,6 @@
             50% { transform: skewY(-6deg) translateY(-25px) rotate(2deg); }
         }
 
-        /* 3D ENVELOPE - MAKER */
         .editor-container {
             perspective: 1400px;
             width: 320px;
@@ -165,9 +161,9 @@
             z-index: 8;
             background: rgba(255,255,255,0.06);
             box-shadow: inset 0 0 30px rgba(0,0,0,0.2);
+            touch-action: none;           /* ← Prevents scrolling/zoom while drawing */
         }
 
-        /* TOOLS */
         .tools {
             display: flex;
             gap: 12px;
@@ -188,7 +184,6 @@
         }
         .color-btn:hover { transform: scale(1.15); }
 
-        /* FORM */
         .form-box {
             background: white;
             padding: 40px 35px;
@@ -214,7 +209,6 @@
             transform: translateY(-2px);
         }
 
-        /* RECEIVER - 3D ENVELOPE */
         .envelope-wrapper {
             position: relative;
             width: 320px;
@@ -297,7 +291,6 @@
             text-shadow: 2px 2px 0 #fff;
         }
 
-        /* ANIMATIONS */
         .shake {
             animation: envelope-shake 0.6s cubic-bezier(0.36,0.07,0.19,0.97) both infinite;
         }
@@ -349,7 +342,7 @@
 
     <div id="maker-page" class="screen hidden">
         <h2 class="text-yellow" style="margin-bottom: 12px; font-size: 3.2rem;">DESIGN YOURS</h2>
-        <p style="font-family:'Inter'; color:white; font-size: 1.1rem; margin-bottom: 30px;">Drag to rotate • Draw anywhere</p>
+        <p style="font-family:'Inter'; color:white; font-size: 1.1rem; margin-bottom: 30px;">Drag to rotate • Draw with finger or mouse</p>
         
         <div class="editor-container" id="editor-container">
             <div class="angpao-card" id="angpao-card">
@@ -492,45 +485,86 @@
             setTimeout(() => target.style.transition = '', 600);
         }
 
-        /* DRAWING */
+        /* ──────────────── DRAWING ──────────────── */
         function getPos(e) {
             const rect = canvas.getBoundingClientRect();
+            let clientX, clientY;
+
+            // Handle touch (use first finger)
+            if (e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+
             const scaleX = canvas.width / rect.width;
             const scaleY = canvas.height / rect.height;
+
             return {
-                x: (e.clientX - rect.left) * scaleX,
-                y: (e.clientY - rect.top) * scaleY
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top)  * scaleY
             };
         }
 
         function draw(e) {
             if (!isDrawing) return;
             const pos = getPos(e);
-            ctx.fillStyle = brushColor;
-            ctx.beginPath();
-            ctx.arc(pos.x, pos.y, 5.5, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Connect previous point for smoother lines
-            if (draw.lastPos) {
-                ctx.strokeStyle = brushColor;
-                ctx.lineWidth = 11;
+
+            ctx.strokeStyle = brushColor;
+            ctx.fillStyle   = brushColor;
+            ctx.lineWidth   = 11;
+            ctx.lineCap     = 'round';
+            ctx.lineJoin    = 'round';
+
+            if (!draw.lastPos) {
+                // First contact - draw a filled circle
+                ctx.beginPath();
+                ctx.arc(pos.x, pos.y, 5.5, 0, Math.PI * 2);
+                ctx.fill();
+            } else {
+                // Draw smooth line to new position
                 ctx.beginPath();
                 ctx.moveTo(draw.lastPos.x, draw.lastPos.y);
                 ctx.lineTo(pos.x, pos.y);
                 ctx.stroke();
             }
+
             draw.lastPos = pos;
         }
 
-        canvas.addEventListener('mousedown', (e) => { 
-            isDrawing = true; 
+        // Unified pointer handlers
+        function pointerDown(e) {
+            e.preventDefault();
+            isDrawing = true;
             draw.lastPos = getPos(e);
-            draw(e); 
-        });
-        canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('mouseup', () => { isDrawing = false; draw.lastPos = null; });
-        canvas.addEventListener('mouseleave', () => { isDrawing = false; draw.lastPos = null; });
+            draw(e);
+        }
+
+        function pointerMove(e) {
+            e.preventDefault();
+            if (!isDrawing) return;
+            draw(e);
+        }
+
+        function pointerUpOrCancel(e) {
+            e.preventDefault();
+            isDrawing = false;
+            draw.lastPos = null;
+        }
+
+        // Mouse events
+        canvas.addEventListener('mousedown',   pointerDown);
+        canvas.addEventListener('mousemove',   pointerMove);
+        canvas.addEventListener('mouseup',     pointerUpOrCancel);
+        canvas.addEventListener('mouseleave',  pointerUpOrCancel);
+
+        // Touch events (critical for mobile)
+        canvas.addEventListener('touchstart',  pointerDown);
+        canvas.addEventListener('touchmove',   pointerMove);
+        canvas.addEventListener('touchend',    pointerUpOrCancel);
+        canvas.addEventListener('touchcancel', pointerUpOrCancel);
 
         function setColor(c) { brushColor = c; }
         function clearCanvas() { 
@@ -588,16 +622,13 @@
             document.getElementById('display-amount').innerText = parseFloat(data.a).toFixed(2);
             document.getElementById('display-msg').innerText = data.m;
 
-            // Render drawing
             const designContainer = document.getElementById('envelope-design-container');
             designContainer.innerHTML = `<img src="${data.d}" alt="Your design">`;
 
             showScreen('receiver-page');
 
-            // 3D on envelope
             add3DInteraction('envelope-wrapper', 'envelope-cover');
 
-            // Gentle shake
             const cover = document.getElementById('envelope-cover');
             cover.classList.add('shake');
         }
@@ -609,18 +640,13 @@
 
             if (cover.classList.contains('opening')) return;
 
-            // Stop shake
             cover.classList.remove('shake');
-
-            // Open flap dramatically
             flap.style.transform = 'rotateX(-108deg)';
 
-            // Slide cover away
             setTimeout(() => {
                 cover.classList.add('opening');
             }, 180);
 
-            // Confetti burst (richer)
             const colors = ['#E8B923', '#D61C1C', '#2396F0', '#FFFFFF', '#FF2D55'];
             let count = 0;
             const burst = setInterval(() => {
@@ -635,7 +661,6 @@
                 if (count > 7) clearInterval(burst);
             }, 90);
 
-            // Reveal letter with premium pop
             setTimeout(() => {
                 letter.classList.add('reveal-content');
             }, 520);
@@ -643,14 +668,11 @@
 
         /* INIT */
         window.onload = () => {
-            // Maker 3D
             add3DInteraction('editor-container', 'angpao-card');
 
-            // Receiver click
             const wrapper = document.getElementById('envelope-wrapper');
             wrapper.addEventListener('click', openEnvelope);
 
-            // URL data
             const urlParams = new URLSearchParams(window.location.search);
             const rawData = urlParams.get('data');
 
