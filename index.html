@@ -6,6 +6,7 @@
     <title>ANGPAO MAKER • 888</title>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
     
     <style>
         :root {
@@ -968,14 +969,14 @@
             });
         }
 
-        /* GENERATION */
+        /* GENERATION WITH LZ-STRING COMPRESSION */
         function generateAngpao() {
             const from = document.getElementById('input-from').value.trim() || "A Friend";
             const to = document.getElementById('input-to').value.trim() || "Lucky One";
             const amt = document.getElementById('input-amount').value || "88.88";
             const msg = document.getElementById('input-msg').value.trim() || "Gong Xi Fa Cai!";
 
-            const drawingData = canvas.toDataURL('image/png');
+            const drawingData = canvas.toDataURL('image/jpeg', 0.6);
 
             const data = { 
                 f: from, 
@@ -985,8 +986,10 @@
                 d: drawingData 
             };
             
-            const encoded = btoa(JSON.stringify(data));
-            const url = `${window.location.origin}${window.location.pathname}?data=${encoded}`;
+            const json = JSON.stringify(data);
+            const compressed = LZString.compressToEncodedURIComponent(json);
+            
+            const url = `${window.location.origin}${window.location.pathname}?d=${compressed}`;
             
             document.getElementById('share-link').value = url;
             showScreen('share-page');
@@ -1016,7 +1019,7 @@
                 t: document.getElementById('input-to').value.trim() || "Lucky One",
                 a: document.getElementById('input-amount').value || "88.88",
                 m: document.getElementById('input-msg').value.trim() || "Gong Xi Fa Cai!",
-                d: canvas.toDataURL('image/png')
+                d: canvas.toDataURL('image/jpeg', 0.6)
             };
             loadReceiverView(data);
         }
@@ -1127,7 +1130,7 @@
             const rainContainer = document.getElementById('money-rain');
             rainContainer.innerHTML = '';
             
-            const moneySymbols = ['💰', '💵', '🀄', '🧧', '🍊', '🧧', '💴', '💶', '💷', '💸'];
+            const moneySymbols = ['M', 'O', 'N', 'E', 'Y', 'M', 'O', 'N', 'E', 'Y'];
             
             for (let i = 0; i < 60; i++) {
                 const money = document.createElement('div');
@@ -1157,11 +1160,12 @@
             wrapper.addEventListener('touchend', openEnvelope);
 
             const urlParams = new URLSearchParams(window.location.search);
-            const rawData = urlParams.get('data');
+            const compressedData = urlParams.get('d');
 
-            if (rawData) {
+            if (compressedData) {
                 try {
-                    const data = JSON.parse(atob(rawData));
+                    const json = LZString.decompressFromEncodedURIComponent(compressedData);
+                    const data = JSON.parse(json);
                     loadReceiverView(data);
                 } catch (e) {
                     console.error("Bad angpao");
