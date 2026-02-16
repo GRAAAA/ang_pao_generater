@@ -9,36 +9,49 @@
     
     <style>
         :root {
-            --bg-red: #D61C1C;
-            --pop-blue: #2396F0;
-            --pop-yellow: #FFF200;
-            --ink-black: #0F0F0F;
-            --paper-white: #F8F1E9;
-            --gold: #E8B923;
+            --bg-red: #C8102E;
+            --pop-blue: #00A8E8;
+            --pop-yellow: #FFCC00;
+            --ink-black: #1A1A1A;
+            --paper-white: #FDF6E3;
+            --gold: linear-gradient(135deg, #F4D03F, #E67E22, #F4D03F);
+            --gold-dark: #B8860B;
+            --crimson: #9B1C2C;
+            --accent-green: #00C853;
         }
 
         * { box-sizing: border-box; }
-        
+
         body {
             margin: 0;
             background: var(--bg-red);
             font-family: 'Anton', sans-serif;
             color: var(--ink-black);
-            overflow-x: hidden;
+            overflow: hidden;
             background-image: 
-                radial-gradient(circle at 20% 30%, rgba(255,210,0,0.08) 0%, transparent 50%),
-                radial-gradient(circle at 80% 70%, rgba(255,210,0,0.08) 0%, transparent 50%);
+                radial-gradient(circle at 15% 25%, rgba(255, 204, 0, 0.12) 0%, transparent 60%),
+                radial-gradient(circle at 85% 75%, rgba(255, 204, 0, 0.12) 0%, transparent 60%),
+                radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.04) 0%, transparent 70%);
+            background-size: 200% 200%;
+            animation: bg-pulse 25s ease infinite;
         }
 
+        @keyframes bg-pulse {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* TYPOGRAPHY */
         h1, h2, h3 { 
             text-transform: uppercase; 
             margin: 0; 
-            line-height: 0.85; 
-            letter-spacing: -2px;
+            line-height: 0.88; 
+            letter-spacing: -1.5px;
+            font-weight: 700;
         }
         .text-blue { 
             color: var(--pop-blue); 
-            text-shadow: 5px 5px 0 var(--ink-black); 
+            text-shadow: 4px 4px 0 var(--ink-black); 
         }
         .text-yellow { 
             color: var(--pop-yellow); 
@@ -47,79 +60,81 @@
 
         button {
             background: var(--pop-yellow);
-            border: 4px solid var(--ink-black);
-            box-shadow: 6px 6px 0 var(--ink-black);
-            padding: 16px 36px;
+            border: 5px solid var(--ink-black);
+            box-shadow: 8px 8px 0 var(--ink-black);
+            padding: 16px 38px;
             font-family: 'Anton', sans-serif;
-            font-size: 1.6rem;
+            font-size: 1.65rem;
             cursor: pointer;
-            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
             text-transform: uppercase;
             position: relative;
             overflow: hidden;
+            border-radius: 8px;
         }
-        button::after {
+        button::before {
             content: '';
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 40%;
-            height: 200%;
-            background: linear-gradient(120deg, transparent, rgba(255,255,255,0.4), transparent);
-            transform: skewX(-25deg);
-            transition: left 0.6s;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.3), transparent);
+            opacity: 0;
+            transition: opacity 0.3s;
         }
-        button:hover::after { left: 120%; }
+        button:hover::before { opacity: 1; }
         button:active { 
-            transform: translate(4px, 4px); 
-            box-shadow: 2px 2px 0 var(--ink-black); 
+            transform: scale(0.95) translate(3px, 3px); 
+            box-shadow: 3px 3px 0 var(--ink-black); 
         }
 
+        /* SCREENS */
         .screen {
-            min-height: 100vh;
+            min-height: 100dvh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 16px;
             position: relative;
-            transition: opacity 0.4s ease;
+            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            gap: 12px;
         }
         .hidden { display: none !important; }
 
+        /* HERO */
         #hero-text {
-            font-size: 16vw;
+            font-size: 15vw;
             text-align: center;
-            transform: skewY(-6deg);
-            margin-bottom: 30px;
-            animation: hero-float 4s ease-in-out infinite;
-            text-shadow: 8px 8px 0 var(--ink-black);
+            transform: skewY(-7deg) rotate(-3deg);
+            margin-bottom: 24px;
+            animation: hero-float 3.8s ease-in-out infinite;
+            text-shadow: 10px 10px 0 var(--ink-black), -2px -2px 0 var(--pop-yellow);
         }
         @keyframes hero-float {
-            0%, 100% { transform: skewY(-6deg) translateY(0) rotate(-2deg); }
-            50% { transform: skewY(-6deg) translateY(-25px) rotate(2deg); }
+            0%, 100% { transform: skewY(-7deg) rotate(-3deg) translateY(0); }
+            50% { transform: skewY(-7deg) rotate(3deg) translateY(-20px); }
         }
 
+        /* 3D ENVELOPE - MAKER */
         .editor-container {
-            perspective: 1400px;
-            width: 320px;
-            height: 480px;
-            margin: 40px 0;
-            filter: drop-shadow(0 30px 40px rgba(0,0,0,0.5));
+            perspective: 1600px;
+            width: 300px;
+            height: 450px;
+            margin: 24px 0 16px;
+            filter: drop-shadow(0 40px 60px rgba(0,0,0,0.65));
         }
         .angpao-card {
             width: 100%;
             height: 100%;
-            background: linear-gradient(145deg, #E82222, #B81A1A);
-            border: 6px solid var(--ink-black);
+            background: linear-gradient(145deg, var(--crimson), #7A1422);
+            border: 7px solid var(--ink-black);
             position: relative;
             transform-style: preserve-3d;
-            transition: transform 0.12s cubic-bezier(0.23, 1, 0.32, 1);
+            transition: transform 0.18s cubic-bezier(0.23, 1, 0.32, 1);
             box-shadow: 
-                0 25px 60px rgba(0,0,0,0.6),
-                inset 0 15px 30px rgba(255,255,255,0.15),
-                inset 0 -15px 30px rgba(0,0,0,0.4);
-            border-radius: 12px;
+                0 35px 80px rgba(0,0,0,0.7),
+                inset 0 25px 40px rgba(255,255,255,0.25),
+                inset 0 -25px 40px rgba(0,0,0,0.55);
+            border-radius: 16px;
             overflow: hidden;
         }
         .angpao-flap {
@@ -127,135 +142,164 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 42%;
-            background: linear-gradient(145deg, #E82222, #B81A1A);
-            clip-path: polygon(0 0, 50% 78%, 100% 0);
-            border: 6px solid var(--ink-black);
+            height: 44%;
+            background: linear-gradient(145deg, var(--crimson), #7A1422);
+            clip-path: polygon(0 0, 50% 82%, 100% 0);
+            border: 7px solid var(--ink-black);
             border-bottom: none;
             z-index: 10;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 14px 28px rgba(0,0,0,0.45);
             transform-origin: top;
+            transition: transform 0.4s ease;
         }
         .angpao-pattern {
             position: absolute;
-            top: 55px;
-            left: 30px;
-            right: 30px;
-            bottom: 110px;
-            border: 3px solid var(--gold);
-            opacity: 0.25;
+            top: 52px;
+            left: 28px;
+            right: 28px;
+            bottom: 98px;
+            border: 4px solid var(--gold-dark);
+            opacity: 0.22;
             pointer-events: none;
             z-index: 5;
-            box-shadow: inset 0 0 40px rgba(255,215,0,0.3);
+            box-shadow: inset 0 0 50px rgba(255,215,0,0.4);
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 12px,
+                rgba(255,215,0,0.08) 12px,
+                rgba(255,215,0,0.08) 24px
+            );
         }
         #drawing-canvas {
             position: absolute;
-            top: 55px;
-            left: 30px;
-            right: 30px;
-            bottom: 110px;
-            width: calc(100% - 60px);
-            height: calc(100% - 165px);
+            top: 52px;
+            left: 28px;
+            right: 28px;
+            bottom: 98px;
+            width: calc(100% - 56px);
+            height: calc(100% - 150px);
             image-rendering: pixelated;
             cursor: crosshair;
             z-index: 8;
-            background: rgba(255,255,255,0.06);
-            box-shadow: inset 0 0 30px rgba(0,0,0,0.2);
-            touch-action: none;           /* ← Prevents scrolling/zoom while drawing */
+            background: rgba(255,255,255,0.08);
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.35);
+            touch-action: none;
         }
 
+        /* TOOLS */
         .tools {
             display: flex;
-            gap: 12px;
-            margin-top: 30px;
+            gap: 14px;
+            margin-top: 18px;
             background: white;
-            padding: 12px 16px;
-            border: 4px solid var(--ink-black);
-            box-shadow: 8px 8px 0 var(--ink-black);
-            border-radius: 8px;
+            padding: 12px 18px;
+            border: 5px solid var(--ink-black);
+            box-shadow: 10px 10px 0 var(--ink-black);
+            border-radius: 12px;
         }
         .color-btn {
-            width: 38px; 
-            height: 38px; 
-            border: 3px solid var(--ink-black);
-            border-radius: 6px;
+            width: 42px; 
+            height: 42px; 
+            border: 4px solid var(--ink-black);
+            border-radius: 8px;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: all 0.25s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            box-shadow: 0 4px 0 var(--ink-black);
         }
-        .color-btn:hover { transform: scale(1.15); }
+        .color-btn:hover { transform: scale(1.22) rotate(8deg); }
+        .color-btn:active { transform: scale(0.92); }
 
+        /* FORM */
         .form-box {
             background: white;
-            padding: 40px 35px;
-            border: 6px solid var(--ink-black);
-            box-shadow: 12px 12px 0 var(--pop-blue);
+            padding: 32px 28px;
+            border: 7px solid var(--ink-black);
+            box-shadow: 14px 14px 0 var(--pop-blue);
             width: 100%;
-            max-width: 420px;
-            border-radius: 12px;
+            max-width: 400px;
+            border-radius: 16px;
         }
         input, textarea {
             width: 100%;
-            border: 4px solid var(--ink-black);
-            padding: 14px 18px;
+            border: 5px solid var(--ink-black);
+            padding: 14px 20px;
             font-family: 'Inter', sans-serif;
-            margin-bottom: 18px;
-            font-size: 1.25rem;
+            margin-bottom: 16px;
+            font-size: 1.22rem;
             background: #f9f9f9;
-            transition: all 0.2s;
+            transition: all 0.25s;
         }
         input:focus, textarea:focus {
             outline: none;
-            box-shadow: 0 0 0 4px var(--pop-yellow);
-            transform: translateY(-2px);
+            box-shadow: 0 0 0 5px var(--pop-yellow);
+            transform: translateY(-3px);
         }
 
+        /* RECEIVER - 3D ENVELOPE */
         .envelope-wrapper {
             position: relative;
-            width: 320px;
-            height: 480px;
+            width: 300px;
+            height: 450px;
             cursor: pointer;
-            perspective: 1400px;
+            perspective: 1600px;
         }
         .closed-envelope {
             width: 100%;
             height: 100%;
-            background: linear-gradient(145deg, #E82222, #B81A1A);
-            border: 6px solid var(--ink-black);
+            background: linear-gradient(145deg, var(--crimson), #7A1422);
+            border: 7px solid var(--ink-black);
             position: absolute;
             z-index: 10;
-            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transition: all 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             box-shadow: 
-                0 30px 70px rgba(0,0,0,0.65),
-                inset 0 20px 40px rgba(255,255,255,0.18),
-                inset 0 -20px 40px rgba(0,0,0,0.45);
-            border-radius: 12px;
+                0 40px 90px rgba(0,0,0,0.75),
+                inset 0 28px 50px rgba(255,255,255,0.22),
+                inset 0 -28px 50px rgba(0,0,0,0.6);
+            border-radius: 16px;
             overflow: hidden;
+        }
+        .closed-envelope.glowing {
+            animation: envelope-glow 1.8s ease-in-out infinite alternate;
+            box-shadow: 
+                0 40px 90px rgba(0,0,0,0.75),
+                inset 0 28px 50px rgba(255,255,255,0.22),
+                inset 0 -28px 50px rgba(0,0,0,0.6),
+                0 0 110px 40px rgba(255, 204, 0, 0.9);
+        }
+        @keyframes envelope-glow {
+            from { 
+                box-shadow: 0 40px 90px rgba(0,0,0,0.75), inset 0 28px 50px rgba(255,255,255,0.22), inset 0 -28px 50px rgba(0,0,0,0.6), 0 0 60px 20px rgba(255, 204, 0, 0.6);
+            }
+            to { 
+                box-shadow: 0 40px 90px rgba(0,0,0,0.75), inset 0 28px 50px rgba(255,255,255,0.22), inset 0 -28px 50px rgba(0,0,0,0.6), 0 0 140px 55px rgba(255, 204, 0, 0.95);
+            }
         }
         .envelope-flap {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            height: 42%;
-            background: linear-gradient(145deg, #E82222, #B81A1A);
-            clip-path: polygon(0 0, 50% 78%, 100% 0);
-            border: 6px solid var(--ink-black);
+            height: 44%;
+            background: linear-gradient(145deg, var(--crimson), #7A1422);
+            clip-path: polygon(0 0, 50% 82%, 100% 0);
+            border: 7px solid var(--ink-black);
             border-bottom: none;
             z-index: 20;
-            box-shadow: 0 12px 25px rgba(0,0,0,0.4);
+            box-shadow: 0 16px 32px rgba(0,0,0,0.5);
             transform-origin: top center;
-            transition: transform 1.1s cubic-bezier(0.6, 0.04, 0.1, 1);
+            transition: transform 1.4s cubic-bezier(0.6, 0.04, 0.1, 1);
         }
         #envelope-design-container {
             position: absolute;
-            top: 55px;
-            left: 30px;
-            right: 30px;
-            bottom: 110px;
+            top: 52px;
+            left: 28px;
+            right: 28px;
+            bottom: 98px;
             z-index: 8;
-            border: 3px solid var(--gold);
+            border: 4px solid var(--gold-dark);
             overflow: hidden;
-            box-shadow: inset 0 0 35px rgba(0,0,0,0.25);
+            box-shadow: inset 0 0 45px rgba(0,0,0,0.4);
         }
         #envelope-design-container img {
             width: 100%;
@@ -270,62 +314,106 @@
             width: 100%;
             height: 100%;
             background: var(--paper-white);
-            border: 6px solid var(--ink-black);
-            padding: 35px 28px;
+            border: 7px solid var(--ink-black);
+            padding: 32px 26px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             z-index: 5;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-            transform: scale(0.75) translateY(40px);
+            box-shadow: 0 30px 70px rgba(0,0,0,0.45);
+            transform: scale(0.68) translateY(55px) rotate(4deg);
             opacity: 0;
-            transition: all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: all 1.1s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .money-letter::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent 0,
+                transparent 8px,
+                rgba(255,215,0,0.06) 8px,
+                rgba(255,215,0,0.06) 16px
+            );
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        .money-letter::after {
+            content: '';
+            position: absolute;
+            inset: -50%;
+            background: linear-gradient(120deg, transparent, rgba(255,255,255,0.9), transparent);
+            transform: skewX(-28deg);
+            animation: letter-shine 2.8s linear 0.8s forwards;
+            pointer-events: none;
+        }
+        @keyframes letter-shine {
+            0% { transform: translateX(-200%) skewX(-28deg); }
+            50% { opacity: 0.85; }
+            100% { transform: translateX(200%) skewX(-28deg); }
         }
         .money-amount {
             font-size: 3.4rem;
             font-weight: 700;
-            color: #1A8C1A;
+            color: var(--accent-green);
             text-align: center;
-            border-bottom: 3px dashed #1A8C1A;
-            padding-bottom: 18px;
-            text-shadow: 2px 2px 0 #fff;
+            border-bottom: 4px dashed var(--accent-green);
+            padding-bottom: 16px;
+            text-shadow: 3px 3px 0 #fff, -1px -1px 0 #fff;
         }
 
+        /* ANIMATIONS - PRO MULTI-LAYERED */
         .shake {
-            animation: envelope-shake 0.6s cubic-bezier(0.36,0.07,0.19,0.97) both infinite;
+            animation: envelope-shake 0.65s cubic-bezier(0.36,0.07,0.19,0.97) both infinite;
         }
         @keyframes envelope-shake {
-            10%, 90% { transform: translate3d(-3px, 0, 0) rotate(-3deg); }
-            20%, 80% { transform: translate3d(4px, 0, 0) rotate(3deg); }
-            30%, 50%, 70% { transform: translate3d(-6px, 0, 0) rotate(-6deg); }
-            40%, 60% { transform: translate3d(6px, 0, 0) rotate(6deg); }
+            0%, 100% { transform: rotate(-3deg) scale(1.015); }
+            25% { transform: rotate(4deg) scale(1.015); }
+            50% { transform: rotate(-5deg) scale(1.015); }
+            75% { transform: rotate(4deg) scale(1.015); }
         }
 
         .opening {
-            transform: translateX(-120%) rotate(-18deg) !important;
+            transform: translateX(-145%) rotate(-26deg) scale(0.82) !important;
+            transition: transform 1.1s cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
         }
 
         .reveal-content {
             opacity: 1 !important;
-            transform: scale(1) translateY(0) !important;
-            animation: letter-pop 0.75s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            transform: scale(1) translateY(0) rotate(0deg) !important;
+            animation: letter-pop 1.05s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
         @keyframes letter-pop {
-            0% { transform: scale(0.6) rotate(12deg) translateY(60px); opacity: 0; }
-            55% { transform: scale(1.08) rotate(-6deg) translateY(-12px); }
-            100% { transform: scale(1) rotate(0) translateY(0); }
+            0% { 
+                transform: scale(0.35) rotate(22deg) translateY(95px); 
+                opacity: 0; 
+            }
+            40% { 
+                transform: scale(1.15) rotate(-11deg) translateY(-22px); 
+            }
+            100% { 
+                transform: scale(1) rotate(0) translateY(0); 
+            }
         }
 
         .decoration-sticker {
             position: absolute;
             background: var(--pop-yellow);
             color: var(--ink-black);
-            padding: 6px 14px;
-            font-size: 0.95rem;
-            border: 3px solid var(--ink-black);
-            border-radius: 30px;
-            box-shadow: 4px 4px 0 var(--ink-black);
+            padding: 7px 16px;
+            font-size: 1rem;
+            border: 4px solid var(--ink-black);
+            border-radius: 40px;
+            box-shadow: 6px 6px 0 var(--ink-black);
             font-weight: 700;
+            animation: sticker-float 4s ease-in-out infinite;
+        }
+        @keyframes sticker-float {
+            0%, 100% { transform: rotate(-12deg) translateY(0); }
+            50% { transform: rotate(-12deg) translateY(-8px); }
         }
     </style>
 </head>
@@ -333,40 +421,40 @@
 
     <div id="landing-page" class="screen">
         <h1 id="hero-text" class="text-blue">ANGPAO<br><span class="text-yellow">888</span></h1>
-        <div style="font-family: 'Inter'; margin-bottom: 40px; font-size: 1.4rem; font-weight: 700; letter-spacing: 1px;">SEND GOOD FORTUNE</div>
+        <div style="font-family: 'Inter'; margin-bottom: 32px; font-size: 1.4rem; font-weight: 700; letter-spacing: 1.5px; color: rgba(255,255,255,0.95);">SEND GOOD FORTUNE</div>
         <button onclick="goToMaker()">MAKE ONE NOW</button>
         
-        <div class="decoration-sticker" style="top: 25px; left: 25px; transform: rotate(-12deg)">福</div>
-        <div class="decoration-sticker" style="bottom: 25px; right: 25px; background: var(--pop-blue); color: white; transform: rotate(8deg)">PROSPERITY</div>
+        <div class="decoration-sticker" style="top: 28px; left: 28px; transform: rotate(-12deg)">福</div>
+        <div class="decoration-sticker" style="bottom: 28px; right: 28px; background: var(--pop-blue); color: white; transform: rotate(8deg)">PROSPERITY</div>
     </div>
 
     <div id="maker-page" class="screen hidden">
-        <h2 class="text-yellow" style="margin-bottom: 12px; font-size: 3.2rem;">DESIGN YOURS</h2>
-        <p style="font-family:'Inter'; color:white; font-size: 1.1rem; margin-bottom: 30px;">Drag to rotate • Draw with finger or mouse</p>
+        <h2 class="text-yellow" style="margin-bottom: 10px; font-size: 3rem;">DESIGN YOURS</h2>
+        <p style="font-family:'Inter'; color:white; font-size: 1.1rem; margin-bottom: 24px;">Drag to rotate • Draw with finger</p>
         
         <div class="editor-container" id="editor-container">
             <div class="angpao-card" id="angpao-card">
                 <div class="angpao-flap"></div>
                 <div class="angpao-pattern"></div>
-                <canvas id="drawing-canvas" width="260" height="375"></canvas>
+                <canvas id="drawing-canvas" width="244" height="310"></canvas>
             </div>
         </div>
 
         <div class="tools">
-            <div class="color-btn" style="background: #E8B923;" onclick="setColor('#E8B923')"></div>
-            <div class="color-btn" style="background: #0F0F0F;" onclick="setColor('#0F0F0F')"></div>
+            <div class="color-btn" style="background: #FFCC00;" onclick="setColor('#FFCC00')"></div>
+            <div class="color-btn" style="background: #1A1A1A;" onclick="setColor('#1A1A1A')"></div>
             <div class="color-btn" style="background: #F5F5F5;" onclick="setColor('#F5F5F5')"></div>
-            <div class="color-btn" style="background: #00E5FF;" onclick="setColor('#00E5FF')"></div>
+            <div class="color-btn" style="background: #00A8E8;" onclick="setColor('#00A8E8')"></div>
             <div class="color-btn" style="background: #FF2D55;" onclick="setColor('#FF2D55')"></div>
-            <button style="padding: 8px 18px; font-size: 1.1rem;" onclick="clearCanvas()">CLEAR</button>
+            <button style="padding: 9px 18px; font-size: 1.1rem;" onclick="clearCanvas()">CLEAR</button>
         </div>
 
-        <br><br>
+        <br>
         <button onclick="goToForm()">SEAL IT</button>
     </div>
 
     <div id="form-page" class="screen hidden">
-        <h2 class="text-blue" style="font-size: 3.2rem; margin-bottom: 30px;">FILL THE BLESSING</h2>
+        <h2 class="text-blue" style="font-size: 3rem; margin-bottom: 24px;">FILL THE BLESSING</h2>
         
         <div class="form-box">
             <label style="font-size: 1.1rem; display: block; margin-bottom: 6px;">FROM</label>
@@ -381,30 +469,30 @@
             <label style="font-size: 1.1rem; display: block; margin-bottom: 6px;">MESSAGE</label>
             <textarea id="input-msg" rows="3" placeholder="Gong Xi Fa Cai! May your year be filled with luck."></textarea>
 
-            <button style="width: 100%; margin-top: 10px;" onclick="generateAngpao()">SEAL & SEND</button>
+            <button style="width: 100%; margin-top: 12px;" onclick="generateAngpao()">SEAL & SEND</button>
         </div>
     </div>
 
     <div id="share-page" class="screen hidden">
-        <h2 class="text-yellow" style="font-size: 3.4rem; margin-bottom: 10px;">IT'S READY!</h2>
-        <p style="font-family:'Inter'; font-weight:700; font-size: 1.25rem; margin-bottom: 25px; max-width: 340px; text-align: center;">
+        <h2 class="text-yellow" style="font-size: 3.4rem; margin-bottom: 12px;">IT'S READY!</h2>
+        <p style="font-family:'Inter'; font-weight:700; font-size: 1.25rem; margin-bottom: 24px; max-width: 340px; text-align: center;">
             Share this link with your friend
         </p>
         
         <input type="text" id="share-link" readonly style="text-align: center; font-size: 1.05rem; padding: 18px;">
-        <button onclick="copyLink()" style="margin-top: 15px;">COPY LINK</button>
+        <button onclick="copyLink()" style="margin-top: 16px;">COPY LINK</button>
         <br><br>
         <button style="background: white; color: var(--ink-black);" onclick="openPreview()">PREVIEW OPENING</button>
     </div>
 
     <div id="receiver-page" class="screen hidden">
-        <h2 id="receiver-title" class="text-blue" style="margin-bottom: 35px; font-size: 2.4rem; text-align: center;"></h2>
+        <h2 id="receiver-title" class="text-blue" style="margin-bottom: 28px; font-size: 2.4rem; text-align: center;"></h2>
         
         <div class="envelope-wrapper" id="envelope-wrapper">
             <div class="closed-envelope" id="envelope-cover">
                 <div class="envelope-flap" id="envelope-flap"></div>
                 <div id="envelope-design-container"></div>
-                <h1 class="text-yellow" style="font-size: 4.8rem; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-12deg); z-index: 30; text-shadow: 6px 6px 0 var(--ink-black);">OPEN</h1>
+                <h1 id="open-text" class="text-yellow" style="font-size: 4.8rem; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-12deg); z-index: 30; text-shadow: 8px 8px 0 var(--ink-black);">OPEN</h1>
             </div>
 
             <div class="money-letter" id="letter-content">
@@ -421,13 +509,14 @@
             </div>
         </div>
 
-        <button onclick="location.href=window.location.pathname" style="margin-top: 50px;">SEND ONE BACK</button>
+        <button onclick="location.href=window.location.pathname" style="margin-top: 40px;">SEND ONE BACK</button>
     </div>
 
     <script>
         /* GLOBAL STATE */
-        let brushColor = '#E8B923';
+        let brushColor = '#FFCC00';
         let isDrawing = false;
+        let isRotating = false;
         const canvas = document.getElementById('drawing-canvas');
         const ctx = canvas.getContext('2d', { alpha: true });
         
@@ -445,52 +534,85 @@
                         s.classList.remove('hidden');
                         s.style.opacity = '1';
                     }
-                }, 300);
+                }, 400);
             });
         }
 
         function goToMaker() { showScreen('maker-page'); }
         function goToForm() { showScreen('form-page'); }
 
-        /* 3D INTERACTION */
+        /* 3D INTERACTION - ENHANCED WITH TOUCH */
         function add3DInteraction(containerId, targetId) {
             const container = document.getElementById(containerId);
             const target = document.getElementById(targetId);
             if (!container || !target) return;
 
-            let isDragging = false;
+            let startX = 0, startY = 0;
+            let currentRotateX = 0, currentRotateY = 0;
 
-            container.addEventListener('mousedown', () => isDragging = true);
-            container.addEventListener('mouseup', () => isDragging = false);
-            container.addEventListener('mouseleave', () => { isDragging = false; reset3D(target); });
-
-            container.addEventListener('mousemove', (e) => {
-                if (!isDragging) return;
+            function updateRotation(clientX, clientY) {
                 const rect = container.getBoundingClientRect();
-                const x = (e.clientX - rect.left) / rect.width;
-                const y = (e.clientY - rect.top) / rect.height;
+                const x = (clientX - rect.left) / rect.width;
+                const y = (clientY - rect.top) / rect.height;
                 
-                const rotateY = (x - 0.5) * 38;
-                const rotateX = (0.5 - y) * 32;
+                const rotateY = (x - 0.5) * 42;
+                const rotateX = (0.5 - y) * 36;
                 
                 target.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            }
+
+            // Mouse
+            container.addEventListener('mousedown', (e) => {
+                if (e.target.closest('#drawing-canvas')) return; // Don't rotate when drawing
+                isRotating = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                target.style.transition = 'none';
+            });
+            document.addEventListener('mousemove', (e) => {
+                if (!isRotating) return;
+                updateRotation(e.clientX, e.clientY);
+            });
+            document.addEventListener('mouseup', () => {
+                if (isRotating) {
+                    isRotating = false;
+                    reset3D(target);
+                }
             });
 
-            container.addEventListener('mouseleave', () => reset3D(target));
+            // Touch
+            container.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1 && e.target.closest('#drawing-canvas')) return;
+                isRotating = true;
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                target.style.transition = 'none';
+                e.preventDefault();
+            }, { passive: false });
+            container.addEventListener('touchmove', (e) => {
+                if (!isRotating || e.touches.length !== 1) return;
+                updateRotation(e.touches[0].clientX, e.touches[0].clientY);
+                e.preventDefault();
+            }, { passive: false });
+            container.addEventListener('touchend', () => {
+                if (isRotating) {
+                    isRotating = false;
+                    reset3D(target);
+                }
+            });
         }
 
         function reset3D(target) {
-            target.style.transition = 'transform 0.6s cubic-bezier(0.23, 1, 0.32, 1)';
+            target.style.transition = 'transform 0.75s cubic-bezier(0.23, 1, 0.32, 1)';
             target.style.transform = 'rotateX(0deg) rotateY(0deg)';
-            setTimeout(() => target.style.transition = '', 600);
+            setTimeout(() => target.style.transition = '', 800);
         }
 
-        /* ──────────────── DRAWING ──────────────── */
+        /* DRAWING */
         function getPos(e) {
             const rect = canvas.getBoundingClientRect();
             let clientX, clientY;
 
-            // Handle touch (use first finger)
             if (e.touches && e.touches.length > 0) {
                 clientX = e.touches[0].clientX;
                 clientY = e.touches[0].clientY;
@@ -519,12 +641,10 @@
             ctx.lineJoin    = 'round';
 
             if (!draw.lastPos) {
-                // First contact - draw a filled circle
                 ctx.beginPath();
                 ctx.arc(pos.x, pos.y, 5.5, 0, Math.PI * 2);
                 ctx.fill();
             } else {
-                // Draw smooth line to new position
                 ctx.beginPath();
                 ctx.moveTo(draw.lastPos.x, draw.lastPos.y);
                 ctx.lineTo(pos.x, pos.y);
@@ -534,9 +654,10 @@
             draw.lastPos = pos;
         }
 
-        // Unified pointer handlers
         function pointerDown(e) {
-            e.preventDefault();
+            if (e.target.closest('.angpao-card')) {
+                e.preventDefault();
+            }
             isDrawing = true;
             draw.lastPos = getPos(e);
             draw(e);
@@ -554,13 +675,11 @@
             draw.lastPos = null;
         }
 
-        // Mouse events
         canvas.addEventListener('mousedown',   pointerDown);
         canvas.addEventListener('mousemove',   pointerMove);
         canvas.addEventListener('mouseup',     pointerUpOrCancel);
         canvas.addEventListener('mouseleave',  pointerUpOrCancel);
 
-        // Touch events (critical for mobile)
         canvas.addEventListener('touchstart',  pointerDown);
         canvas.addEventListener('touchmove',   pointerMove);
         canvas.addEventListener('touchend',    pointerUpOrCancel);
@@ -637,33 +756,72 @@
             const cover = document.getElementById('envelope-cover');
             const flap = document.getElementById('envelope-flap');
             const letter = document.getElementById('letter-content');
+            const openText = document.getElementById('open-text');
 
             if (cover.classList.contains('opening')) return;
 
             cover.classList.remove('shake');
-            flap.style.transform = 'rotateX(-108deg)';
+            cover.classList.add('glowing');
+
+            flap.style.transform = 'rotateX(-142deg)';
+
+            if (openText) {
+                openText.style.transition = 'all 0.5s ease';
+                openText.style.opacity = '0';
+                openText.style.transform = 'translate(-50%, -50%) rotate(-12deg) scale(0.6)';
+            }
 
             setTimeout(() => {
                 cover.classList.add('opening');
-            }, 180);
+            }, 280);
 
-            const colors = ['#E8B923', '#D61C1C', '#2396F0', '#FFFFFF', '#FF2D55'];
-            let count = 0;
-            const burst = setInterval(() => {
+            // PRO CONFETTI - Multi-layered energy burst
+            const colors = ['#FFCC00', '#C8102E', '#00A8E8', '#FFFFFF', '#FF2D55', '#00C853'];
+            
+            // Main burst
+            confetti({
+                particleCount: 160,
+                spread: 110,
+                origin: { x: 0.5, y: 0.3 },
+                colors: colors,
+                scalar: 1.35,
+                gravity: 0.75,
+                ticks: 280
+            });
+
+            // Side flares
+            setTimeout(() => {
                 confetti({
-                    particleCount: 18,
-                    spread: 70,
-                    origin: { x: 0.5, y: 0.4 },
+                    particleCount: 95,
+                    spread: 160,
+                    origin: { x: 0.15, y: 0.48 },
                     colors: colors,
-                    scalar: 1.2
+                    scalar: 1.25
                 });
-                count++;
-                if (count > 7) clearInterval(burst);
-            }, 90);
+                confetti({
+                    particleCount: 95,
+                    spread: 160,
+                    origin: { x: 0.85, y: 0.48 },
+                    colors: colors,
+                    scalar: 1.25
+                });
+            }, 320);
+
+            // Sparkle trail
+            setTimeout(() => {
+                confetti({
+                    particleCount: 45,
+                    spread: 40,
+                    origin: { x: 0.5, y: 0.65 },
+                    colors: ['#FFCC00', '#FFFFFF'],
+                    scalar: 0.8,
+                    gravity: 1.2
+                });
+            }, 620);
 
             setTimeout(() => {
                 letter.classList.add('reveal-content');
-            }, 520);
+            }, 740);
         }
 
         /* INIT */
