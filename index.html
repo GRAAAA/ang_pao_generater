@@ -455,6 +455,58 @@
                 margin: 10px 0;
             }
         }
+
+        /* MONEY RAIN CONTAINER */
+        #money-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .money {
+            position: absolute;
+            font-size: 28px;
+            color: #00C853;
+            opacity: 0.9;
+            animation: fall linear forwards;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(120vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* MEME CONTAINER */
+        #meme-container {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 12px 0;
+            margin-top: 16px;
+            scrollbar-width: none;
+        }
+
+        #meme-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .meme-img {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border: 4px solid var(--ink-black);
+            border-radius: 12px;
+            box-shadow: 4px 4px 0 var(--ink-black);
+            flex-shrink: 0;
+        }
     </style>
 </head>
 <body>
@@ -546,11 +598,19 @@
                     <div style="font-family: 'Inter'; font-size: 0.95rem; color: #777; letter-spacing: 1px;">YOU RECEIVED</div>
                     <div class="money-amount">RM <span id="display-amount"></span></div>
                 </div>
+
+                <!-- MEME SECTION -->
+                <div id="meme-container">
+                    <!-- Images added via JS -->
+                </div>
             </div>
         </div>
 
         <button onclick="location.href=window.location.pathname" style="margin-top: 40px;">SEND ONE BACK</button>
     </div>
+
+    <!-- MONEY RAIN CONTAINER -->
+    <div id="money-rain"></div>
 
     <script>
         /* GLOBAL STATE */
@@ -810,6 +870,7 @@
                 cover.classList.add('opening');
             }, 280);
 
+            // PRO CONFETTI
             const colors = ['#FFCC00', '#C8102E', '#00A8E8', '#FFFFFF', '#FF2D55', '#00C853'];
             
             confetti({
@@ -839,20 +900,38 @@
                 });
             }, 320);
 
-            setTimeout(() => {
-                confetti({
-                    particleCount: 45,
-                    spread: 40,
-                    origin: { x: 0.5, y: 0.65 },
-                    colors: ['#FFCC00', '#FFFFFF'],
-                    scalar: 0.8,
-                    gravity: 1.2
-                });
-            }, 620);
+            // MONEY RAIN
+            startMoneyRain();
 
             setTimeout(() => {
                 letter.classList.add('reveal-content');
             }, 740);
+        }
+
+        /* MONEY RAIN */
+        function startMoneyRain() {
+            const rainContainer = document.getElementById('money-rain');
+            rainContainer.innerHTML = '';
+            
+            const moneySymbols = ['💰', '💵', '🀄', '🧧', '🍊', '🧧'];
+            
+            for (let i = 0; i < 35; i++) {
+                const money = document.createElement('div');
+                money.className = 'money';
+                money.textContent = moneySymbols[Math.floor(Math.random() * moneySymbols.length)];
+                money.style.left = Math.random() * 100 + 'vw';
+                money.style.top = '-' + (Math.random() * 100 + 50) + 'px';
+                money.style.animationDuration = (Math.random() * 3 + 2.5) + 's';
+                money.style.animationDelay = Math.random() * 0.8 + 's';
+                money.style.fontSize = (Math.random() * 18 + 22) + 'px';
+                money.style.opacity = Math.random() * 0.6 + 0.7;
+                rainContainer.appendChild(money);
+                
+                // Remove after animation
+                setTimeout(() => {
+                    if (money.parentNode) money.parentNode.removeChild(money);
+                }, 6000);
+            }
         }
 
         /* INIT */
@@ -861,6 +940,7 @@
 
             const wrapper = document.getElementById('envelope-wrapper');
             wrapper.addEventListener('click', openEnvelope);
+            wrapper.addEventListener('touchend', openEnvelope);  // Extra for mobile tap
 
             const urlParams = new URLSearchParams(window.location.search);
             const rawData = urlParams.get('data');
