@@ -6,7 +6,7 @@
     <title>ANGPAO MAKER • 888</title>
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
     
     <style>
         :root {
@@ -247,11 +247,12 @@
             width: calc(100% - 36px);
             height: calc(100% - 106px);
             image-rendering: pixelated;
-            cursor: crosshair;
+            cursor: default;
             z-index: 8;
             background: rgba(255,255,255,0.08);
             box-shadow: inset 0 0 36px rgba(0,0,0,0.3);
             touch-action: none;
+            pointer-events: none;
         }
 
         /* TOOLS - COMPACT FOR MOBILE */
@@ -346,7 +347,7 @@
             100% { border-color: #FF2D55; }
         }
 
-        /* RECEIVER - 3D ENVELOPE */
+        /* RECEIVER - 3D ENVELOPE + FOLDED LETTER */
         .envelope-wrapper {
             position: relative;
             width: min(240px, 75vw);
@@ -413,47 +414,112 @@
             overflow: hidden;
             box-shadow: inset 0 0 40px rgba(0,0,0,0.35);
         }
-        #envelope-design-container img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            image-rendering: pixelated;
-        }
+
+        /* ────────────────────────────────────────────────────────
+           UPDATED LETTER LOGIC (NOTEBOOK OPENING STYLE)
+           This fixes the "half-split" bug by using a hinged cover.
+           ──────────────────────────────────────────────────────── */
         .money-letter {
             position: absolute;
-            top: 0; 
-            left: 0;
+            inset: 0;
             width: 100%;
-            height: 100%;
             background: var(--paper-white);
             border: 5px solid var(--ink-black);
-            padding: 20px 16px;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
             z-index: 5;
             box-shadow: var(--shadow-soft);
-            transform: scale(0.7) translateY(50px) rotate(3deg);
+            
+            /* Initial State: Hidden and Small */
             opacity: 0;
-            transition: all 1.1s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform: scale(0.6) translateY(50px) rotate(5deg);
+            height: 200px; /* Small height when folded */
+            
+            transition: 
+                opacity 0.5s ease,
+                transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1),
+                height 0.8s cubic-bezier(0.23, 1, 0.32, 1); /* Smooth height growth */
+            
             border-radius: 14px;
+            perspective: 1500px; /* Essential for the 3D flip */
+            transform-style: preserve-3d;
         }
-        .money-letter::after {
-            content: '';
+
+        /* 1. Revealed State (popped out of envelope, but still closed) */
+        .money-letter.revealed {
+            opacity: 1;
+            transform: scale(0.9) translateY(0) rotate(0deg);
+            z-index: 100; /* Ensure it's above everything */
+            cursor: pointer;
+        }
+
+        /* 2. Unfolded State (Clicked -> Opens up) */
+        .money-letter.unfolded {
+            height: 100%; /* Grows to full container height */
+            transform: scale(1) translateY(0) rotate(0deg);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            cursor: default;
+        }
+
+        /* THE COVER FLAP (The part that flips up) */
+        .letter-cover {
             position: absolute;
-            inset: -50%;
-            background: linear-gradient(120deg, transparent, rgba(255,255,255,0.85), transparent);
-            transform: skewX(-25deg);
-            animation: letter-shine 2.6s linear 0.7s forwards;
-            pointer-events: none;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 200px; /* Matches the folded height */
+            background: var(--paper-white);
+            border-bottom: 4px dashed #ccc;
+            z-index: 50;
+            transform-origin: top; /* Hinges at the top */
+            transition: transform 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+            backface-visibility: hidden; /* Hides it when fully open */
+            
+            /* Center the "From" text */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            border-radius: 10px 10px 0 0;
         }
-        @keyframes letter-shine {
-            0% { transform: translateX(-180%) skewX(-25deg); }
-            50% { opacity: 0.8; }
-            100% { transform: translateX(180%) skewX(-25deg); }
+
+        /* Rotate the cover when unfolded */
+        .money-letter.unfolded .letter-cover {
+            transform: rotateX(160deg);
+            box-shadow: 0 -10px 20px rgba(0,0,0,0.1); /* Shadow for depth */
         }
+
+        /* Styling inside the Cover */
+        .teaser-text {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--ink-black);
+            text-transform: uppercase;
+            transform: rotate(-3deg);
+            text-align: center;
+        }
+
+        /* THE INSIDE CONTENT (Hidden until unfolded) */
+        .full-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 24px 20px;
+            padding-top: 40px; /* Space for the hinge */
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            overflow-y: auto;
+            gap: 16px;
+        }
+
+        /* Show content when unfolded */
+        .money-letter.unfolded .full-content {
+            opacity: 1;
+            transition-delay: 0.3s; /* Wait for flip to start */
+        }
+
         .money-amount {
-            font-size: 2.8rem;
+            font-size: clamp(2.4rem, 8vw, 3.2rem);
             font-weight: 700;
             color: var(--accent-green);
             text-align: center;
@@ -466,6 +532,17 @@
         @keyframes money-flash {
             0%, 100% { transform: scale(1); color: var(--accent-green); }
             50% { transform: scale(1.1); color: #FFD700; }
+        }
+
+        #display-msg {
+            word-break: break-word;
+            font-size: clamp(1.05rem, 4vw, 1.2rem);
+            line-height: 1.5;
+            color: #333;
+            background: rgba(255,255,255,0.6);
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid rgba(0,0,0,0.05);
         }
 
         /* ANIMATIONS */
@@ -494,20 +571,6 @@
         @keyframes opening-spin {
             0% { transform: translateX(0) rotate(0deg) scale(1); }
             100% { transform: translateX(-145%) rotate(-386deg) scale(0.82); }
-        }
-
-        .reveal-content {
-            opacity: 1 !important;
-            transform: scale(1) translateY(0) rotate(0deg) !important;
-            animation: letter-pop-crazy 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
-        @keyframes letter-pop-crazy {
-            0% { transform: scale(0.25) rotate(45deg) translateY(120px); opacity: 0; }
-            20% { transform: scale(1.25) rotate(-22deg) translateY(-30px); }
-            40% { transform: scale(0.85) rotate(15deg) translateY(10px); }
-            60% { transform: scale(1.15) rotate(-10deg) translateY(-15px); }
-            80% { transform: scale(0.95) rotate(5deg) translateY(5px); }
-            100% { transform: scale(1) rotate(0) translateY(0); }
         }
 
         .decoration-sticker {
@@ -648,22 +711,6 @@
         #meme-container::-webkit-scrollbar {
             display: none;
         }
-
-        .meme-img {
-            width: 90px;
-            height: 90px;
-            object-fit: cover;
-            border: 3px solid var(--ink-black);
-            border-radius: 12px;
-            box-shadow: 4px 4px 0 var(--ink-black);
-            flex-shrink: 0;
-            animation: meme-wiggle 1.5s ease-in-out infinite;
-        }
-
-        @keyframes meme-wiggle {
-            0%, 100% { transform: rotate(-3deg); }
-            50% { transform: rotate(3deg) scale(1.05); }
-        }
     </style>
 </head>
 <body>
@@ -679,7 +726,7 @@
 
     <div id="maker-page" class="screen hidden">
         <h2 class="text-yellow" style="margin-bottom: 6px; font-size: 2.4rem;">DESIGN YOURS</h2>
-        <p style="font-family:'Inter'; color:white; font-size: 0.95rem; margin-bottom: 8px;">Drag to rotate • Draw with finger</p>
+        <p style="font-family:'Inter'; color:white; font-size: 0.95rem; margin-bottom: 8px;">Drag to rotate • Pick color</p>
         
         <div class="editor-container" id="editor-container">
             <div class="angpao-card" id="angpao-card">
@@ -690,12 +737,12 @@
         </div>
 
         <div class="tools">
-            <div class="color-btn" style="background: #FFCC00;" onclick="setColor('#FFCC00')"></div>
-            <div class="color-btn" style="background: #1A1A1A;" onclick="setColor('#1A1A1A')"></div>
-            <div class="color-btn" style="background: #F5F5F5;" onclick="setColor('#F5F5F5')"></div>
-            <div class="color-btn" style="background: #00A8E8;" onclick="setColor('#00A8E8')"></div>
-            <div class="color-btn" style="background: #FF2D55;" onclick="setColor('#FF2D55')"></div>
-            <button style="padding: 8px 16px; font-size: 0.95rem;" onclick="clearCanvas()">CLEAR</button>
+            <div class="color-btn" style="background: #C8102E;" onclick="setEnvelopeColor('#C8102E')"></div>
+            <div class="color-btn" style="background: #9B1C2C;" onclick="setEnvelopeColor('#9B1C2C')"></div>
+            <div class="color-btn" style="background: #B22222;" onclick="setEnvelopeColor('#B22222')"></div>
+            <div class="color-btn" style="background: #8B0000;" onclick="setEnvelopeColor('#8B0000')"></div>
+            <div class="color-btn" style="background: #DC143C;" onclick="setEnvelopeColor('#DC143C')"></div>
+            <div class="color-btn" style="background: #FF4500;" onclick="setEnvelopeColor('#FF4500')"></div>
         </div>
 
         <button onclick="goToForm()" style="margin-top: 8px;">SEAL IT</button>
@@ -742,42 +789,72 @@
                 <h1 id="open-text" class="text-yellow" style="font-size: 3.8rem; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-12deg); z-index: 30; text-shadow: 8px 8px 0 var(--ink-black);">OPEN</h1>
             </div>
 
-            <div class="money-letter" id="letter-content">
-                <div>
-                    <h3 style="font-size: 1.3rem; color: #444; margin-bottom: 12px;">
-                        FROM: <span id="display-from" style="color: var(--ink-black);"></span>
-                    </h3>
-                    <p id="display-msg" style="font-family: 'Inter'; font-size: 1.15rem; line-height: 1.35; color: #333;"></p>
-                </div>
-                <div>
-                    <div style="font-family: 'Inter'; font-size: 0.85rem; color: #777; letter-spacing: 1px;">YOU RECEIVED</div>
-                    <div class="money-amount">RM <span id="display-amount"></span></div>
+            <div class="money-letter" id="letter-content" onclick="toggleFold()">
+                
+                <div class="letter-cover">
+                    <div class="teaser-text">
+                        <div style="font-size: 0.9rem; font-family:'Inter'; opacity:0.7; margin-bottom:5px;">A GIFT FROM</div>
+                        <span id="display-from-teaser"></span>
+                    </div>
                 </div>
 
-                <!-- MEME SECTION -->
-                <div id="meme-container">
-                    <!-- Images added via JS -->
+                <div class="full-content">
+                    <h3 style="font-size: 1.3rem; color: #444; margin-bottom: 4px;">
+                        FROM: <span id="display-from" style="color: var(--ink-black);"></span>
+                    </h3>
+                    
+                    <div class="money-amount">RM <span id="display-amount"></span></div>
+                    
+                    <p id="display-msg"></p>
+
+                    <div id="meme-container" style="margin-top: 16px;"></div>
+
+                    <button onclick="location.href=window.location.pathname" style="margin-top: auto; font-size:1rem; min-height:40px; padding:10px;">SEND ONE BACK</button>
                 </div>
             </div>
         </div>
-
-        <button onclick="location.href=window.location.pathname" style="margin-top: 20px;">SEND ONE BACK</button>
     </div>
 
-    <!-- MONEY RAIN CONTAINER -->
     <div id="money-rain"></div>
 
     <script>
         /* GLOBAL STATE */
-        let brushColor = '#FFCC00';
-        let isDrawing = false;
         let isRotating = false;
-        const canvas = document.getElementById('drawing-canvas');
-        const ctx = canvas.getContext('2d', { alpha: true });
-        
-        ctx.lineJoin = 'round';
-        ctx.lineCap = 'round';
-        ctx.lineWidth = 9;
+        let envelopeColor = '#C8102E';
+        let isUnfolded = false; // Tracks if the letter is open
+
+        function setEnvelopeColor(c) {
+            envelopeColor = c;
+            document.getElementById('angpao-card').style.background = `linear-gradient(145deg, ${c}, #7A1422)`;
+            confetti({
+                particleCount: 20,
+                spread: 40,
+                origin: { y: 0.7 },
+                colors: [c]
+            });
+        }
+
+        /* NEW FOLD LOGIC: NOTEBOOK FLIP */
+        function toggleFold() {
+            const letter = document.getElementById('letter-content');
+            isUnfolded = !isUnfolded;
+
+            if (isUnfolded) {
+                // OPEN IT
+                letter.classList.add('unfolded');
+                
+                // Visual flare
+                confetti({
+                    particleCount: 40,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: ['#00C853', '#FFCC00']
+                });
+            } else {
+                // CLOSE IT (Optional, if user wants to close)
+                letter.classList.remove('unfolded');
+            }
+        }
 
         /* NAV */
         function showScreen(id) {
@@ -802,7 +879,6 @@
             triggerScreenConfetti();
         }
 
-        /* CONFETTI ON SCREEN CHANGE */
         function triggerScreenConfetti() {
             confetti({
                 particleCount: 50,
@@ -831,7 +907,6 @@
                 target.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
             }
 
-            // Mouse events
             container.addEventListener('mousedown', (e) => {
                 if (e.target.closest('#drawing-canvas')) return;
                 isRotating = true;
@@ -848,7 +923,6 @@
                 }
             });
 
-            // Touch events
             container.addEventListener('touchstart', (e) => {
                 if (e.touches.length === 1 && e.target.closest('#drawing-canvas')) return;
                 isRotating = true;
@@ -874,120 +948,49 @@
             setTimeout(() => target.style.transition = '', 800);
         }
 
-        /* DRAWING */
-        function getPos(e) {
-            const rect = canvas.getBoundingClientRect();
-            let clientX, clientY;
-
-            if (e.touches && e.touches.length > 0) {
-                clientX = e.touches[0].clientX;
-                clientY = e.touches[0].clientY;
-            } else {
-                clientX = e.clientX;
-                clientY = e.clientY;
+        /* COMPRESSION HELPERS */
+        function compressToUrlSafe(str) {
+            const uint8 = new TextEncoder().encode(str);
+            const compressed = pako.deflate(uint8, { level: 9 });
+            let binary = '';
+            for (let i = 0; i < compressed.length; i++) {
+                binary += String.fromCharCode(compressed[i]);
             }
-
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-
-            return {
-                x: (clientX - rect.left) * scaleX,
-                y: (clientY - rect.top)  * scaleY
-            };
+            return btoa(binary)
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=+$/, '');
         }
 
-        function draw(e) {
-            if (!isDrawing) return;
-            const pos = getPos(e);
-
-            ctx.strokeStyle = brushColor;
-            ctx.fillStyle   = brushColor;
-            ctx.lineWidth   = 9;
-            ctx.lineCap     = 'round';
-            ctx.lineJoin    = 'round';
-
-            if (!draw.lastPos) {
-                ctx.beginPath();
-                ctx.arc(pos.x, pos.y, 4.5, 0, Math.PI * 2);
-                ctx.fill();
-            } else {
-                ctx.beginPath();
-                ctx.moveTo(draw.lastPos.x, draw.lastPos.y);
-                ctx.lineTo(pos.x, pos.y);
-                ctx.stroke();
+        function decompressFromUrlSafe(str) {
+            str = str.replace(/-/g, '+').replace(/_/g, '/');
+            while (str.length % 4) str += '=';
+            const binary = atob(str);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
             }
-
-            draw.lastPos = pos;
+            const decompressed = pako.inflate(bytes);
+            return new TextDecoder().decode(decompressed);
         }
 
-        function pointerDown(e) {
-            if (e.target.closest('.angpao-card')) {
-                e.preventDefault();
-            }
-            isDrawing = true;
-            draw.lastPos = getPos(e);
-            draw(e);
-        }
-
-        function pointerMove(e) {
-            e.preventDefault();
-            if (!isDrawing) return;
-            draw(e);
-        }
-
-        function pointerUpOrCancel(e) {
-            e.preventDefault();
-            isDrawing = false;
-            draw.lastPos = null;
-        }
-
-        canvas.addEventListener('mousedown',   pointerDown);
-        canvas.addEventListener('mousemove',   pointerMove);
-        canvas.addEventListener('mouseup',     pointerUpOrCancel);
-        canvas.addEventListener('mouseleave',  pointerUpOrCancel);
-
-        canvas.addEventListener('touchstart',  pointerDown);
-        canvas.addEventListener('touchmove',   pointerMove);
-        canvas.addEventListener('touchend',    pointerUpOrCancel);
-        canvas.addEventListener('touchcancel', pointerUpOrCancel);
-
-        function setColor(c) { 
-            brushColor = c; 
-            confetti({
-                particleCount: 20,
-                spread: 40,
-                origin: { y: 0.7 },
-                colors: [c]
-            });
-        }
-        function clearCanvas() { 
-            ctx.clearRect(0, 0, canvas.width, canvas.height); 
-            confetti({
-                particleCount: 30,
-                spread: 60,
-                origin: { y: 0.6 }
-            });
-        }
-
-        /* GENERATION WITH LZ-STRING COMPRESSION */
+        /* GENERATION WITH COMPRESSION */
         function generateAngpao() {
-            const from = document.getElementById('input-from').value.trim() || "A Friend";
-            const to = document.getElementById('input-to').value.trim() || "Lucky One";
-            const amt = document.getElementById('input-amount').value || "88.88";
-            const msg = document.getElementById('input-msg').value.trim() || "Gong Xi Fa Cai!";
+            const from   = document.getElementById('input-from').value.trim() || "A Friend";
+            const to     = document.getElementById('input-to').value.trim()   || "Lucky One";
+            const amount = document.getElementById('input-amount').value      || "88.88";
+            const msg    = document.getElementById('input-msg').value.trim()  || "Gong Xi Fa Cai!";
 
-            const drawingData = canvas.toDataURL('image/jpeg', 0.6);
+            const payload = [
+                from,
+                to,
+                amount,
+                msg,
+                envelopeColor
+            ];
 
-            const data = { 
-                f: from, 
-                t: to, 
-                a: amt, 
-                m: msg,
-                d: drawingData 
-            };
-            
-            const json = JSON.stringify(data);
-            const compressed = LZString.compressToEncodedURIComponent(json);
+            const json = JSON.stringify(payload);
+            const compressed = compressToUrlSafe(json);
             
             const url = `${window.location.origin}${window.location.pathname}?d=${compressed}`;
             
@@ -1003,7 +1006,6 @@
             const origText = link.value;
             link.value = "COPIED ✓";
             
-            // MEGA CONFETTI
             confetti({
                 particleCount: 100,
                 spread: 70,
@@ -1014,32 +1016,40 @@
         }
 
         function openPreview() {
-            const data = {
-                f: document.getElementById('input-from').value.trim() || "A Friend",
-                t: document.getElementById('input-to').value.trim() || "Lucky One",
-                a: document.getElementById('input-amount').value || "88.88",
-                m: document.getElementById('input-msg').value.trim() || "Gong Xi Fa Cai!",
-                d: canvas.toDataURL('image/jpeg', 0.6)
-            };
-            loadReceiverView(data);
+            const from   = document.getElementById('input-from').value.trim() || "A Friend";
+            const to     = document.getElementById('input-to').value.trim()   || "Lucky One";
+            const amount = document.getElementById('input-amount').value      || "88.88";
+            const msg    = document.getElementById('input-msg').value.trim()  || "Gong Xi Fa Cai!";
+
+            const payload = [
+                from, to, amount, msg,
+                envelopeColor
+            ];
+
+            loadReceiverView(payload);
         }
 
         /* RECEIVER */
-        function loadReceiverView(data) {
-            document.getElementById('display-from').innerText = data.f;
-            document.getElementById('receiver-title').innerText = `FOR ${data.t.toUpperCase()}`;
-            document.getElementById('display-amount').innerText = parseFloat(data.a).toFixed(2);
-            document.getElementById('display-msg').innerText = data.m;
+        function loadReceiverView(payload) {
+            const [from, to, amount, msg, color] = payload;
 
-            const designContainer = document.getElementById('envelope-design-container');
-            designContainer.innerHTML = `<img src="${data.d}" alt="Your design">`;
+            // Update Texts
+            document.getElementById('display-from').innerText = from;
+            document.getElementById('display-from-teaser').innerText = from; // Update Cover Text
+            document.getElementById('receiver-title').innerText = `FOR ${to.toUpperCase()}`;
+            document.getElementById('display-amount').innerText = parseFloat(amount).toFixed(2);
+            document.getElementById('display-msg').innerText = msg;
+
+            // Update Envelope Color
+            const cover = document.getElementById('envelope-cover');
+            cover.style.background = `linear-gradient(145deg, ${color}, #7A1422)`;
 
             showScreen('receiver-page');
 
             add3DInteraction('envelope-wrapper', 'envelope-cover');
 
-            const cover = document.getElementById('envelope-cover');
-            cover.classList.add('shake');
+            const coverEl = document.getElementById('envelope-cover');
+            coverEl.classList.add('shake');
         }
 
         function openEnvelope() {
@@ -1061,14 +1071,13 @@
                 openText.style.transform = 'translate(-50%, -50%) rotate(-12deg) scale(0.6)';
             }
 
+            // Animate envelope flying away
             setTimeout(() => {
                 cover.classList.add('opening');
             }, 280);
 
-            // MEGA PRO CONFETTI EXTRAVAGANZA
+            // Confetti Explosion
             const colors = ['#FFCC00', '#C8102E', '#00A8E8', '#FFFFFF', '#FF2D55', '#00C853'];
-            
-            // First wave
             confetti({
                 particleCount: 200,
                 spread: 120,
@@ -1079,49 +1088,10 @@
                 ticks: 300
             });
 
-            // Second wave
+            // Delay showing the letter slightly so it looks like it popped out
             setTimeout(() => {
-                confetti({
-                    particleCount: 120,
-                    spread: 180,
-                    origin: { x: 0.15, y: 0.5 },
-                    colors: colors,
-                    scalar: 1.4
-                });
-                confetti({
-                    particleCount: 120,
-                    spread: 180,
-                    origin: { x: 0.85, y: 0.5 },
-                    colors: colors,
-                    scalar: 1.4
-                });
-            }, 300);
-
-            // Third wave - from bottom
-            setTimeout(() => {
-                confetti({
-                    particleCount: 150,
-                    angle: 60,
-                    spread: 80,
-                    origin: { x: 0, y: 1 },
-                    colors: colors,
-                    scalar: 1.3
-                });
-                confetti({
-                    particleCount: 150,
-                    angle: 120,
-                    spread: 80,
-                    origin: { x: 1, y: 1 },
-                    colors: colors,
-                    scalar: 1.3
-                });
-            }, 600);
-
-            // MONEY RAIN
-            startMoneyRain();
-
-            setTimeout(() => {
-                letter.classList.add('reveal-content');
+                letter.classList.add('revealed');
+                startMoneyRain();
             }, 740);
         }
 
@@ -1144,7 +1114,6 @@
                 money.style.opacity = Math.random() * 0.4 + 0.6;
                 rainContainer.appendChild(money);
                 
-                // Remove after animation
                 setTimeout(() => {
                     if (money.parentNode) money.parentNode.removeChild(money);
                 }, 7000);
@@ -1156,19 +1125,24 @@
             add3DInteraction('editor-container', 'angpao-card');
 
             const wrapper = document.getElementById('envelope-wrapper');
-            wrapper.addEventListener('click', openEnvelope);
-            wrapper.addEventListener('touchend', openEnvelope);
+            // We only attach the click to the envelope COVER now, handled inside the div onclick
+            // wrapper.addEventListener('click', openEnvelope); 
+            
+            // Handle wrapper click for the envelope part only
+            const envCover = document.getElementById('envelope-cover');
+            envCover.addEventListener('click', openEnvelope);
+            envCover.addEventListener('touchend', openEnvelope);
 
             const urlParams = new URLSearchParams(window.location.search);
             const compressedData = urlParams.get('d');
 
             if (compressedData) {
                 try {
-                    const json = LZString.decompressFromEncodedURIComponent(compressedData);
-                    const data = JSON.parse(json);
-                    loadReceiverView(data);
+                    const json = decompressFromUrlSafe(compressedData);
+                    const payload = JSON.parse(json);
+                    loadReceiverView(payload);
                 } catch (e) {
-                    console.error("Bad angpao");
+                    console.error("Bad angpao", e);
                     showScreen('landing-page');
                 }
             } else {
